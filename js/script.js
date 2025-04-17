@@ -492,28 +492,30 @@ function initColorMixer() {
   function createPixelGrid() {
     pixelGridContainer.innerHTML = "";
 
-    // Create a 8x8 grid of "pixels" (64 total)
-    for (let i = 0; i < 64; i++) {
-      const pixelContainer = document.createElement("div");
-      pixelContainer.classList.add("pixel-container");
+    // Create a perfect 8x8 grid of "pixels" (64 total)
+    for (let row = 0; row < 8; row++) {
+      for (let col = 0; col < 8; col++) {
+        const pixelContainer = document.createElement("div");
+        pixelContainer.classList.add("pixel-container");
 
-      // Create the three RGB subpixels for each pixel
-      const redSubpixel = document.createElement("div");
-      redSubpixel.classList.add("subpixel", "red-subpixel");
+        // Create the three RGB subpixels for each pixel
+        const redSubpixel = document.createElement("div");
+        redSubpixel.classList.add("subpixel", "red-subpixel");
 
-      const greenSubpixel = document.createElement("div");
-      greenSubpixel.classList.add("subpixel", "green-subpixel");
+        const greenSubpixel = document.createElement("div");
+        greenSubpixel.classList.add("subpixel", "green-subpixel");
 
-      const blueSubpixel = document.createElement("div");
-      blueSubpixel.classList.add("subpixel", "blue-subpixel");
+        const blueSubpixel = document.createElement("div");
+        blueSubpixel.classList.add("subpixel", "blue-subpixel");
 
-      // Add subpixels to the pixel container
-      pixelContainer.appendChild(redSubpixel);
-      pixelContainer.appendChild(greenSubpixel);
-      pixelContainer.appendChild(blueSubpixel);
+        // Add subpixels to the pixel container
+        pixelContainer.appendChild(redSubpixel);
+        pixelContainer.appendChild(greenSubpixel);
+        pixelContainer.appendChild(blueSubpixel);
 
-      // Add the pixel to the grid
-      pixelGridContainer.appendChild(pixelContainer);
+        // Add the pixel to the grid
+        pixelGridContainer.appendChild(pixelContainer);
+      }
     }
   }
 
