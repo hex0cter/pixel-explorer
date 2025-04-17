@@ -108,150 +108,206 @@ function initPixelZoom() {
     }, 1000); // Wait 1 second, then check if image loaded
     
     // Handle mouse movement over the sample image
-    sampleImage.addEventListener('mousemove', function(e) {
-        if (!imgLoaded) {
-            console.log("Image not loaded yet, skipping mousemove");
-            return;
-        }
-        
-        const rect = sampleImage.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        
-        updateZoomArea(x, y);
+    sampleImage.addEventListener("mousemove", function (e) {
+      if (!imgLoaded) return;
+
+      // Get accurate cursor position relative to the image
+      const rect = sampleImage.getBoundingClientRect();
+
+      // Calculate the position relative to the image itself, accounting for any scaling
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      // Update the zoom area to center exactly on the cursor position
+      updateZoomArea(x, y);
     });
-    
+
+    // Also add a click handler to make it easier to test/debug
+    sampleImage.addEventListener("click", function (e) {
+      if (!imgLoaded) return;
+
+      const rect = sampleImage.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      console.log("Click at:", x, y);
+      updateZoomArea(x, y);
+    });
+
     // Handle zoom slider change
-    zoomSlider.addEventListener('input', function() {
-        currentZoomLevel = parseInt(zoomSlider.value);
-        console.log("Zoom level changed to:", currentZoomLevel);
-        
-        updateZoomedView();
+    zoomSlider.addEventListener("input", function () {
+      currentZoomLevel = parseInt(zoomSlider.value);
+      console.log("Zoom level changed to:", currentZoomLevel);
+
+      // Update zoomed view with new zoom level
+      updateZoomedView();
     });
-    
+
     function updateZoomArea(x, y) {
-        // Get base image dimensions
-        const rect = sampleImage.getBoundingClientRect();
-        
-        // Size and position of the red highlight box
-        const zoomAreaSize = 50;
-        zoomArea.style.left = Math.max(0, Math.min(rect.width - zoomAreaSize, x - zoomAreaSize / 2)) + 'px';
-        zoomArea.style.top = Math.max(0, Math.min(rect.height - zoomAreaSize, y - zoomAreaSize / 2)) + 'px';
-        zoomArea.style.width = zoomAreaSize + 'px';
-        zoomArea.style.height = zoomAreaSize + 'px';
-        
-        // Update zoomed view based on current position
-        updateZoomedView();
+      // Size of the red highlight box
+      const zoomAreaSize = 50;
+
+      // Position the zoom area exactly centered on the cursor position
+      // Important: we position absolutely relative to the canvas-container
+      const canvasContainer = document.getElementById("pixel-canvas");
+      const canvasRect = canvasContainer.getBoundingClientRect();
+      const imageRect = sampleImage.getBoundingClientRect();
+
+      // Calculate the position relative to the canvas container
+      // This ensures proper positioning regardless of any margins or padding
+      const relativeX = x + (imageRect.left - canvasRect.left);
+      const relativeY = y + (imageRect.top - canvasRect.top);
+
+      // Set the position, ensuring the box stays within the image boundaries
+      zoomArea.style.left = relativeX - zoomAreaSize / 2 + "px";
+      zoomArea.style.top = relativeY - zoomAreaSize / 2 + "px";
+      zoomArea.style.width = zoomAreaSize + "px";
+      zoomArea.style.height = zoomAreaSize + "px";
+
+      // Update cursor to make it clear where the center is
+      sampleImage.style.cursor = "crosshair";
+
+      // Update the zoomed view
+      updateZoomedView();
     }
-    
+
     function updateZoomedView() {
-        if (!imgLoaded) {
-            console.log("Cannot update zoomed view - image not loaded");
-            return;
-        }
-        
-        console.log("Updating zoomed view");
-        
-        // Get the position of the zoom area relative to the original image
-        const rect = sampleImage.getBoundingClientRect();
-        const zoomRect = zoomArea.getBoundingClientRect();
-        
-        // Calculate the center of the zoom area
-        const centerX = (zoomRect.left + zoomRect.width / 2) - rect.left;
-        const centerY = (zoomRect.top + zoomRect.height / 2) - rect.top;
-        
-        console.log("Zoom center (relative to image):", centerX, centerY);
-        
-        // Scale factors between the displayed image and the actual image
-        const scaleX = sampleImage.naturalWidth / rect.width;
-        const scaleY = sampleImage.naturalHeight / rect.height;
-        
-        // Calculate the corresponding position in the original image
-        const imgX = Math.floor(centerX * scaleX);
-        const imgY = Math.floor(centerY * scaleY);
-        
-        console.log("Image coordinates:", imgX, imgY);
-        
-        // Size of the area to sample from the original image
-        // As zoom level increases, we sample a smaller area
-        const sampleSize = Math.max(2, Math.min(40, sampleImage.naturalWidth / currentZoomLevel / 2));
-        
-        console.log("Sample size:", sampleSize, "pixels at zoom level", currentZoomLevel);
-        
-        // Get canvas context for the zoomed view
-        const zoomCtx = zoomedView.getContext('2d');
-        
-        // Clear the zoomed view
-        zoomCtx.clearRect(0, 0, zoomedView.width, zoomedView.height);
-        
-        try {
-            // For higher zoom levels, render individual pixels
-            if (currentZoomLevel > 10) {
-                console.log("Using pixel-by-pixel rendering for high zoom");
-                
-                // Size of each pixel in the zoomed view
-                const pixelSize = zoomedView.width / (sampleSize * 2);
-                
-                // Draw each pixel from the sample area
-                for (let y = 0; y < sampleSize * 2; y++) {
-                    for (let x = 0; x < sampleSize * 2; x++) {
-                        // Source coordinates in the original image
-                        const sourceX = Math.max(0, Math.min(canvas.width - 1, imgX - sampleSize + x));
-                        const sourceY = Math.max(0, Math.min(canvas.height - 1, imgY - sampleSize + y));
-                        
-                        try {
-                            // Get the color of this pixel
-                            const pixelData = ctx.getImageData(sourceX, sourceY, 1, 1).data;
-                            
-                            // Set the fill style to this pixel's color
-                            zoomCtx.fillStyle = `rgb(${pixelData[0]}, ${pixelData[1]}, ${pixelData[2]})`;
-                            
-                            // Draw a rectangle representing this pixel
-                            zoomCtx.fillRect(
-                                Math.floor(x * pixelSize),
-                                Math.floor(y * pixelSize),
-                                Math.ceil(pixelSize),
-                                Math.ceil(pixelSize)
-                            );
-                            
-                            // Draw grid lines for very high zoom
-                            if (currentZoomLevel > 20) {
-                                zoomCtx.strokeStyle = '#888';
-                                zoomCtx.lineWidth = 0.5;
-                                zoomCtx.strokeRect(
-                                    Math.floor(x * pixelSize),
-                                    Math.floor(y * pixelSize),
-                                    Math.ceil(pixelSize),
-                                    Math.ceil(pixelSize)
-                                );
-                            }
-                        } catch (e) {
-                            console.error("Error getting pixel data:", e);
-                        }
-                    }
-                }
-            } else {
-                // For lower zoom levels, use drawImage for better performance
-                console.log("Using drawImage for low zoom");
-                
-                // Calculate the source rectangle to sample from the original image
-                const sourceX = Math.max(0, Math.min(canvas.width - sampleSize * 2, imgX - sampleSize));
-                const sourceY = Math.max(0, Math.min(canvas.height - sampleSize * 2, imgY - sampleSize));
-                const sourceWidth = Math.min(sampleSize * 2, canvas.width - sourceX);
-                const sourceHeight = Math.min(sampleSize * 2, canvas.height - sourceY);
-                
-                console.log("Source rectangle:", sourceX, sourceY, sourceWidth, sourceHeight);
-                
-                // Draw the sampled portion to the zoomed view
-                zoomCtx.drawImage(
-                    canvas,
-                    sourceX, sourceY, sourceWidth, sourceHeight,
-                    0, 0, zoomedView.width, zoomedView.height
+      if (!imgLoaded) {
+        console.log("Cannot update zoomed view - image not loaded");
+        return;
+      }
+
+      console.log("Updating zoomed view with zoom level:", currentZoomLevel);
+
+      // Get the position of the zoom area relative to the original image
+      const rect = sampleImage.getBoundingClientRect();
+      const zoomRect = zoomArea.getBoundingClientRect();
+
+      // Calculate the center of the zoom area
+      const centerX = zoomRect.left + zoomRect.width / 2 - rect.left;
+      const centerY = zoomRect.top + zoomRect.height / 2 - rect.top;
+
+      // Scale factors between the displayed image and the actual image
+      const scaleX = sampleImage.naturalWidth / rect.width;
+      const scaleY = sampleImage.naturalHeight / rect.height;
+
+      // Calculate the corresponding position in the original image
+      const imgX = Math.floor(centerX * scaleX);
+      const imgY = Math.floor(centerY * scaleY);
+
+      // Size of the area to sample from the original image
+      // As zoom level increases, we sample a smaller area (more zoomed in)
+      const baseSampleSize = 40; // Base sample size at zoom level 1
+      const sampleSize = baseSampleSize / Math.max(1, currentZoomLevel);
+
+      console.log(
+        "Sample size:",
+        sampleSize,
+        "pixels at zoom level",
+        currentZoomLevel
+      );
+
+      // Get canvas context for the zoomed view
+      const zoomCtx = zoomedView.getContext("2d");
+
+      // Clear the zoomed view
+      zoomCtx.clearRect(0, 0, zoomedView.width, zoomedView.height);
+
+      try {
+        // For higher zoom levels, render individual pixels
+        if (currentZoomLevel > 10) {
+          console.log("Using pixel-by-pixel rendering for high zoom");
+
+          // Size of each pixel in the zoomed view
+          const pixelSize = zoomedView.width / (sampleSize * 2);
+
+          // Draw each pixel from the sample area
+          for (let y = 0; y < sampleSize * 2; y++) {
+            for (let x = 0; x < sampleSize * 2; x++) {
+              // Source coordinates in the original image
+              const sourceX = Math.max(
+                0,
+                Math.min(canvas.width - 1, imgX - sampleSize + x)
+              );
+              const sourceY = Math.max(
+                0,
+                Math.min(canvas.height - 1, imgY - sampleSize + y)
+              );
+
+              try {
+                // Get the color of this pixel
+                const pixelData = ctx.getImageData(sourceX, sourceY, 1, 1).data;
+
+                // Set the fill style to this pixel's color
+                zoomCtx.fillStyle = `rgb(${pixelData[0]}, ${pixelData[1]}, ${pixelData[2]})`;
+
+                // Draw a rectangle representing this pixel
+                zoomCtx.fillRect(
+                  Math.floor(x * pixelSize),
+                  Math.floor(y * pixelSize),
+                  Math.ceil(pixelSize),
+                  Math.ceil(pixelSize)
                 );
+
+                // Draw grid lines for very high zoom
+                if (currentZoomLevel > 20) {
+                  zoomCtx.strokeStyle = "#888";
+                  zoomCtx.lineWidth = 0.5;
+                  zoomCtx.strokeRect(
+                    Math.floor(x * pixelSize),
+                    Math.floor(y * pixelSize),
+                    Math.ceil(pixelSize),
+                    Math.ceil(pixelSize)
+                  );
+                }
+              } catch (e) {
+                console.error("Error getting pixel data:", e);
+              }
             }
-        } catch (e) {
-            console.error("Error updating zoomed view:", e);
+          }
+        } else {
+          // For lower zoom levels, use drawImage for better performance
+          console.log("Using drawImage for low zoom");
+
+          // Calculate the source rectangle to sample from the original image
+          const sourceX = Math.max(
+            0,
+            Math.min(canvas.width - sampleSize * 2, imgX - sampleSize)
+          );
+          const sourceY = Math.max(
+            0,
+            Math.min(canvas.height - sampleSize * 2, imgY - sampleSize)
+          );
+          const sourceWidth = Math.min(sampleSize * 2, canvas.width - sourceX);
+          const sourceHeight = Math.min(
+            sampleSize * 2,
+            canvas.height - sourceY
+          );
+
+          console.log(
+            "Source rectangle:",
+            sourceX,
+            sourceY,
+            sourceWidth,
+            sourceHeight
+          );
+
+          // Draw the sampled portion to the zoomed view
+          zoomCtx.drawImage(
+            canvas,
+            sourceX,
+            sourceY,
+            sourceWidth,
+            sourceHeight,
+            0,
+            0,
+            zoomedView.width,
+            zoomedView.height
+          );
         }
+      } catch (e) {
+        console.error("Error updating zoomed view:", e);
+      }
     }
 
     // Create a default colorful image if we don't have a sample
