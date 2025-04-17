@@ -48,6 +48,7 @@ function initPixelZoom() {
     const zoomArea = document.getElementById('zoom-area');
     const zoomedView = document.getElementById('zoomed-view');
     const zoomSlider = document.getElementById('zoom-slider');
+    const imageUpload = document.getElementById('image-upload');
     
     console.log("Sample Image:", sampleImage);
     console.log("Zoom Area:", zoomArea);
@@ -62,6 +63,38 @@ function initPixelZoom() {
     // Initialize default zoom level
     let currentZoomLevel = parseInt(zoomSlider.value);
     console.log("Initial zoom level:", currentZoomLevel);
+    
+    // Add event handler for image upload
+    imageUpload.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        
+        if (file && file.type.match('image.*')) {
+            console.log("User uploaded an image:", file.name);
+            
+            // Create a FileReader to read the image
+            const reader = new FileReader();
+            
+            reader.onload = function(readerEvent) {
+                // When the file is loaded, set it as the image source
+                sampleImage.src = readerEvent.target.result;
+                
+                // Reset zoom position and level when a new image is loaded
+                currentZoomLevel = parseInt(zoomSlider.value);
+                zoomSlider.value = currentZoomLevel;
+                
+                // Reset the image loaded flag - the onload handler will set it back
+                imgLoaded = false;
+            };
+            
+            // Read the file as a data URL
+            reader.readAsDataURL(file);
+            
+            // Show a confirmation message
+            alert('Image uploaded successfully! Try zooming in to see the pixels.');
+        } else {
+            alert('Please select a valid image file.');
+        }
+    });
     
     // Load the sample image
     console.log("Setting up image load handler");

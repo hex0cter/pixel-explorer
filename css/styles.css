@@ -267,6 +267,41 @@ footer {
     background-size: contain;
 }
 
+/* Upload Button Styles */
+.upload-container {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: center;
+}
+
+.upload-button {
+    background: #e74c3c;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    display: inline-block;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.upload-button:hover {
+    background: #c0392b;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+}
+
+.hidden-input {
+    width: 0.1px;
+    height: 0.1px;
+    opacity: 0;
+    overflow: hidden;
+    position: absolute;
+    z-index: -1;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .display-container {
