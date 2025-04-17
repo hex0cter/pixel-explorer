@@ -569,114 +569,169 @@ function initColorMixer() {
 
 // ----- Resolution Explorer Implementation -----
 function initResolutionExplorer() {
-    const resolutionSelector = document.getElementById('resolution-selector');
-    const resolutionDisplay = document.getElementById('resolution-display');
-    
-    // Create canvas for drawing
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    
-    // Original image for resolution manipulation
-    const originalImage = new Image();
-    originalImage.onload = function() {
-        canvas.width = originalImage.width;
-        canvas.height = originalImage.height;
-        ctx.drawImage(originalImage, 0, 0);
-        updateResolution();
+  const resolutionSelector = document.getElementById("resolution-selector");
+  const resolutionDisplay = document.getElementById("resolution-display");
+
+  // Use an actual image element instead of background-image
+  const displayImage = document.createElement("img");
+  displayImage.style.maxWidth = "100%";
+  displayImage.style.maxHeight = "300px";
+  displayImage.style.display = "block";
+  displayImage.style.margin = "0 auto";
+
+  // Add the image to the display container
+  resolutionDisplay.appendChild(displayImage);
+
+  // Set default image path
+  const imagePath = "img/sample-image.jpg";
+
+  // Original image for resolution manipulation
+  const originalImage = new Image();
+  originalImage.crossOrigin = "Anonymous"; // To prevent CORS issues with canvas
+
+  originalImage.onload = function () {
+    console.log("Resolution Explorer: Original image loaded successfully!");
+    console.log(
+      "Image dimensions:",
+      originalImage.width,
+      "x",
+      originalImage.height
+    );
+    updateResolution();
+  };
+
+  originalImage.onerror = function () {
+    console.error("Error loading sample image, creating placeholder");
+    createPlaceholderImage();
+  };
+
+  // Start loading the image
+  originalImage.src = imagePath;
+
+  // Handle resolution selector change
+  resolutionSelector.addEventListener("change", updateResolution);
+
+  // Update the displayed image based on selected resolution
+  function updateResolution() {
+    const resolution = resolutionSelector.value;
+    console.log("Changing resolution to:", resolution);
+
+    // Define scaling factors for different resolutions
+    const scalingFactors = {
+      high: 1.0, // Original resolution (100%)
+      medium: 0.5, // Medium resolution (50%)
+      low: 0.25, // Low resolution (25%)
+      "very-low": 0.1, // Very low resolution (10%)
     };
-    
-    // Set default image or use a placeholder
-    originalImage.src = 'img/sample-image.jpg';
-    originalImage.onerror = function() {
-        createPlaceholderImage();
-    };
-    
-    // Handle resolution selector change
-    resolutionSelector.addEventListener('change', updateResolution);
-    
-    // Update the displayed image based on selected resolution
-    function updateResolution() {
-        const resolution = resolutionSelector.value;
-        
-        // Define scaling factors for different resolutions
-        const scalingFactors = {
-            'high': 1.0,     // Original resolution (100%)
-            'medium': 0.5,   // Medium resolution (50%)
-            'low': 0.25,     // Low resolution (25%)
-            'very-low': 0.1  // Very low resolution (10%)
-        };
-        
-        // Get scaling factor based on selected resolution
-        const scaleFactor = scalingFactors[resolution];
-        
-        // Create a temp canvas for down-sampling and up-sampling
-        const tempCanvas = document.createElement('canvas');
-        const tempCtx = tempCanvas.getContext('2d');
-        
-        // Down-sample the original image
-        const downWidth = Math.max(4, Math.floor(canvas.width * scaleFactor));
-        const downHeight = Math.max(4, Math.floor(canvas.height * scaleFactor));
-        
-        tempCanvas.width = downWidth;
-        tempCanvas.height = downHeight;
-        
-        // Draw the original image at reduced resolution
-        tempCtx.drawImage(originalImage, 0, 0, downWidth, downHeight);
-        
-        // Now up-sample back to original size to show pixelation
-        tempCanvas.width = canvas.width;
-        tempCanvas.height = canvas.height;
-        
-        // Use nearest-neighbor sampling for a pixelated look
-        tempCtx.imageSmoothingEnabled = false;
-        
-        // Draw the down-sampled image back at the original size
-        tempCtx.drawImage(
-            tempCanvas, 
-            0, 0, downWidth, downHeight, 
-            0, 0, canvas.width, canvas.height
-        );
-        
-        // Set the image as background of the display area
-        resolutionDisplay.style.backgroundImage = `url(${tempCanvas.toDataURL()})`;
+
+    // Get scaling factor based on selected resolution
+    const scaleFactor = scalingFactors[resolution];
+
+    // Create canvas for manipulation
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+
+    // Downscale
+    const downWidth = Math.max(
+      4,
+      Math.floor(originalImage.width * scaleFactor)
+    );
+    const downHeight = Math.max(
+      4,
+      Math.floor(originalImage.height * scaleFactor)
+    );
+
+    console.log("Downsampling to:", downWidth, "x", downHeight);
+
+    // First draw at a small size (downsampling)
+    canvas.width = downWidth;
+    canvas.height = downHeight;
+    ctx.drawImage(originalImage, 0, 0, downWidth, downHeight);
+
+    // Then change canvas size to original and draw without smoothing (upsampling)
+    const tempData = ctx.getImageData(0, 0, downWidth, downHeight);
+    canvas.width = originalImage.width;
+    canvas.height = originalImage.height;
+    ctx.imageSmoothingEnabled = false; // Ensures pixelated look
+
+    // Put back the small version
+    const tempCanvas = document.createElement("canvas");
+    tempCanvas.width = downWidth;
+    tempCanvas.height = downHeight;
+    const tempCtx = tempCanvas.getContext("2d");
+    tempCtx.putImageData(tempData, 0, 0);
+
+    // Draw it scaled up
+    ctx.drawImage(
+      tempCanvas,
+      0,
+      0,
+      downWidth,
+      downHeight,
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
+
+    // Update the display image
+    try {
+      const imageUrl = canvas.toDataURL();
+      console.log("Generated image URL for resolution:", resolution);
+      displayImage.src = imageUrl;
+      console.log("Image source set with new resolution");
+    } catch (e) {
+      console.error("Error creating image URL:", e);
     }
-    
-    // Create a placeholder image for demonstration
-    function createPlaceholderImage() {
-        canvas.width = 800;
-        canvas.height = 600;
-        
-        // Create gradient background
-        const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-        gradient.addColorStop(0, "#3498db");
-        gradient.addColorStop(1, "#2ecc71");
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        // Add some shapes for visual interest
-        ctx.fillStyle = "#e74c3c";
-        ctx.beginPath();
-        ctx.arc(canvas.width/2, canvas.height/2, 100, 0, Math.PI * 2);
-        ctx.fill();
-        
-        ctx.fillStyle = "#f39c12";
-        ctx.fillRect(canvas.width/4, canvas.height/4, 150, 150);
-        
-        ctx.fillStyle = "#9b59b6";
-        ctx.beginPath();
-        ctx.moveTo(canvas.width*3/4, canvas.height/4);
-        ctx.lineTo(canvas.width*3/4 + 150, canvas.height/4);
-        ctx.lineTo(canvas.width*3/4 + 75, canvas.height/4 + 150);
-        ctx.closePath();
-        ctx.fill();
-        
-        // Draw some text
-        ctx.font = "bold 48px Arial";
-        ctx.fillStyle = "white";
-        ctx.textAlign = "center";
-        ctx.fillText("Resolution Demo", canvas.width/2, 100);
-        
-        // Set as original image for processing
-        originalImage.src = canvas.toDataURL();
-    }
+  }
+
+  // Create a placeholder image if the sample image fails to load
+  function createPlaceholderImage() {
+    console.log("Creating placeholder image for Resolution Explorer");
+
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+
+    canvas.width = 800;
+    canvas.height = 600;
+
+    // Create gradient background
+    const gradient = ctx.createLinearGradient(
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
+    gradient.addColorStop(0, "#3498db");
+    gradient.addColorStop(1, "#2ecc71");
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Add shapes
+    ctx.fillStyle = "#e74c3c";
+    ctx.beginPath();
+    ctx.arc(canvas.width / 2, canvas.height / 2, 100, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = "#f39c12";
+    ctx.fillRect(canvas.width / 4, canvas.height / 4, 150, 150);
+
+    ctx.fillStyle = "#9b59b6";
+    ctx.beginPath();
+    ctx.moveTo((canvas.width * 3) / 4, canvas.height / 4);
+    ctx.lineTo((canvas.width * 3) / 4 + 150, canvas.height / 4);
+    ctx.lineTo((canvas.width * 3) / 4 + 75, canvas.height / 4 + 150);
+    ctx.closePath();
+    ctx.fill();
+
+    // Draw text
+    ctx.font = "bold 48px Arial";
+    ctx.fillStyle = "white";
+    ctx.textAlign = "center";
+    ctx.fillText("Resolution Demo", canvas.width / 2, 100);
+
+    // Assign the generated image to our original image
+    originalImage.src = canvas.toDataURL();
+    console.log("Placeholder image created successfully");
+  }
 }
