@@ -1,0 +1,280 @@
+/* Base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #f5f7fa;
+}
+
+h1, h2, h3, h4 {
+    color: #2c3e50;
+}
+
+/* Layout */
+header, main, footer {
+    padding: 1rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+header {
+    text-align: center;
+    padding: 2rem 1rem;
+    background: linear-gradient(135deg, #67B26F 0%, #4ca2cd 100%);
+    color: white;
+    border-radius: 0 0 10px 10px;
+}
+
+header h1 {
+    color: white;
+    margin-bottom: 0.5rem;
+    font-size: 2.5rem;
+}
+
+footer {
+    text-align: center;
+    padding: 1.5rem;
+    margin-top: 3rem;
+    border-top: 1px solid #ddd;
+    color: #7f8c8d;
+}
+
+/* Introduction Section */
+#introduction {
+    text-align: center;
+    padding: 3rem 1rem;
+}
+
+#introduction h2 {
+    font-size: 2.2rem;
+    margin-bottom: 1.5rem;
+    color: #3498db;
+}
+
+#introduction p {
+    font-size: 1.2rem;
+    max-width: 800px;
+    margin: 0 auto 2rem;
+}
+
+/* Buttons */
+.primary-button {
+    background: #3498db;
+    border: none;
+    color: white;
+    padding: 12px 30px;
+    border-radius: 30px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.primary-button:hover {
+    background: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Game container */
+#game-container {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    margin-top: 2rem;
+}
+
+/* Tabs */
+.tabs {
+    display: flex;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid #eee;
+}
+
+.tab-button {
+    padding: 12px 24px;
+    background: none;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    color: #95a5a6;
+}
+
+.tab-button:hover {
+    color: #3498db;
+}
+
+.tab-button.active {
+    color: #3498db;
+    font-weight: bold;
+}
+
+.tab-button.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background-color: #3498db;
+}
+
+/* Game Areas */
+.game-area {
+    display: none;
+    padding: 1rem 0;
+}
+
+.game-area.active {
+    display: block;
+}
+
+.game-area h2 {
+    margin-bottom: 0.5rem;
+    font-size: 1.8rem;
+    color: #2c3e50;
+}
+
+.game-area p {
+    margin-bottom: 1.5rem;
+    color: #7f8c8d;
+}
+
+/* Interactive Area Layout */
+.interactive-area {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+.controls {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+}
+
+.display-container {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+}
+
+.canvas-container {
+    background-color: #eee;
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    min-height: 300px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.info-panel {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+}
+
+.info-panel h3 {
+    margin-bottom: 1rem;
+    color: #3498db;
+}
+
+/* Helper Classes */
+.hidden {
+    display: none;
+}
+
+/* Pixel Zoom Specific Styles */
+#sample-image {
+    max-width: 100%;
+    max-height: 300px;
+    display: block;
+}
+
+#zoom-area {
+    position: absolute;
+    border: 2px solid #e74c3c;
+    width: 50px;
+    height: 50px;
+    pointer-events: none;
+}
+
+#zoomed-view {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 150px;
+    height: 150px;
+    border: 3px solid #3498db;
+    background-color: white;
+    overflow: hidden;
+}
+
+/* Color Mixer Specific Styles */
+.color-slider-container {
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+}
+
+.color-slider-container label {
+    width: 60px;
+    display: inline-block;
+}
+
+.color-slider-container input[type="range"] {
+    flex: 1;
+    margin: 0 15px;
+}
+
+#color-display {
+    width: 200px;
+    height: 200px;
+    border: 3px solid #ddd;
+    margin: 0 auto;
+}
+
+#pixel-grid-container {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    width: 300px;
+    height: 300px;
+    margin: 20px auto 0;
+}
+
+.pixel {
+    border: 1px solid #ddd;
+    aspect-ratio: 1/1;
+}
+
+/* Resolution Explorer Specific Styles */
+#resolution-display {
+    width: 100%;
+    height: 300px;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .display-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .tabs {
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+}

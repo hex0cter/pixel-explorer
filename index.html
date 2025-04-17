@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How Screens Work - Interactive Educational Game</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Discover How Screens Work!</h1>
+        <p>An interactive journey into pixels and colors</p>
+    </header>
+
+    <main>
+        <section id="introduction">
+            <h2>Welcome, Explorer!</h2>
+            <p>Have you ever wondered how you can see pictures, videos, and games on your screen? Join us on an adventure to discover the amazing world of pixels and colors!</p>
+            <button id="start-button" class="primary-button">Start Exploring</button>
+        </section>
+
+        <section id="game-container" class="hidden">
+            <div class="tabs">
+                <button class="tab-button active" data-tab="pixel-zoom">Pixel Zoom</button>
+                <button class="tab-button" data-tab="color-mixer">Color Creator</button>
+                <button class="tab-button" data-tab="resolution">Resolution Explorer</button>
+            </div>
+
+            <div id="pixel-zoom" class="game-area active">
+                <h2>Pixel Zoom Adventure</h2>
+                <p>Zoom in to see how images are made of tiny dots called pixels!</p>
+                
+                <div class="interactive-area">
+                    <div class="controls">
+                        <label for="zoom-slider">Zoom Level:</label>
+                        <input type="range" id="zoom-slider" min="1" max="40" value="1">
+                    </div>
+                    
+                    <div class="display-container">
+                        <div id="pixel-canvas" class="canvas-container">
+                            <img id="sample-image" src="img/sample-image.jpg" alt="Sample Image">
+                            <div id="zoom-area"></div>
+                            <canvas id="zoomed-view" width="150" height="150"></canvas>
+                        </div>
+                        <div id="pixel-info" class="info-panel">
+                            <h3>What Are Pixels?</h3>
+                            <p>Pixels are tiny dots that make up everything you see on a screen. Each pixel can display a different color!</p>
+                            <p>Try zooming in to see individual pixels.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="color-mixer" class="game-area hidden">
+                <h2>Color Creator Lab</h2>
+                <p>Mix red, green, and blue light to create any color on your screen!</p>
+                
+                <div class="interactive-area">
+                    <div class="controls">
+                        <div class="color-slider-container">
+                            <label for="red-slider">Red:</label>
+                            <input type="range" id="red-slider" min="0" max="255" value="0">
+                            <span id="red-value">0</span>
+                        </div>
+                        <div class="color-slider-container">
+                            <label for="green-slider">Green:</label>
+                            <input type="range" id="green-slider" min="0" max="255" value="0">
+                            <span id="green-value">0</span>
+                        </div>
+                        <div class="color-slider-container">
+                            <label for="blue-slider">Blue:</label>
+                            <input type="range" id="blue-slider" min="0" max="255" value="0">
+                            <span id="blue-value">0</span>
+                        </div>
+                    </div>
+
+                    <div class="display-container">
+                        <div class="canvas-container">
+                            <div id="color-display"></div>
+                            <div id="pixel-grid-container"></div>
+                        </div>
+                        <div class="info-panel">
+                            <h3>RGB Color Mixing</h3>
+                            <p>Screens use three colors of light: Red, Green, and Blue (RGB) to make all the colors you can see.</p>
+                            <p>Try moving the sliders to create your own colors!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="resolution" class="game-area hidden">
+                <h2>Resolution Explorer</h2>
+                <p>See how the number of pixels affects image quality!</p>
+                
+                <div class="interactive-area">
+                    <div class="controls">
+                        <label for="resolution-selector">Change Resolution:</label>
+                        <select id="resolution-selector">
+                            <option value="high">High Resolution</option>
+                            <option value="medium">Medium Resolution</option>
+                            <option value="low">Low Resolution</option>
+                            <option value="very-low">Very Low Resolution</option>
+                        </select>
+                    </div>
+                    
+                    <div class="display-container">
+                        <div class="canvas-container">
+                            <div id="resolution-display"></div>
+                        </div>
+                        <div class="info-panel">
+                            <h3>What is Resolution?</h3>
+                            <p>Resolution means how many pixels are in your screen. More pixels = clearer images!</p>
+                            <p>Try changing the resolution to see the difference!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Created for educational purposes &copy; 2025</p>
+    </footer>
+
+    <script src="js/script.js"></script>
+</body>
+</html>
