@@ -245,6 +245,35 @@ footer {
     margin: 0 auto;
 }
 
+/* Updated Color Mixer Specific Styles with RGB subpixels */
+#pixel-grid-container {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    width: 300px;
+    height: 300px;
+    margin: 20px auto 0;
+    gap: 2px;
+    background-color: #333;
+    padding: 2px;
+    border-radius: 4px;
+}
+
+.pixel-container {
+    background-color: #000;
+    display: flex;
+    border: 1px solid #555;
+}
+
+.subpixel {
+    flex: 1;
+    height: 100%;
+}
+
+/* Add a subtle separator between subpixels */
+.red-subpixel, .green-subpixel {
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
 #pixel-grid-container {
     display: grid;
     grid-template-columns: repeat(10, 1fr);

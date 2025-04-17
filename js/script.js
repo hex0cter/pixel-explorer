@@ -247,9 +247,87 @@ function initPixelZoom() {
       zoomCtx.clearRect(0, 0, zoomedView.width, zoomedView.height);
 
       try {
-        // For higher zoom levels, render individual pixels
-        if (currentZoomLevel > 10) {
-          console.log("Using pixel-by-pixel rendering for high zoom");
+        const maxZoomLevel = 40; // Maximum zoom level from the slider
+        
+        // For highest zoom level, render RGB subpixels
+        if (currentZoomLevel === maxZoomLevel) {
+          console.log("Using RGB subpixel rendering for maximum zoom");
+
+          // Size of each pixel in the zoomed view
+          const pixelSize = zoomedView.width / (sampleSize * 2);
+          const subpixelWidth = pixelSize / 3; // Each subpixel is 1/3 the width of the full pixel
+
+          // Draw each pixel from the sample area
+          for (let y = 0; y < sampleSize * 2; y++) {
+            for (let x = 0; x < sampleSize * 2; x++) {
+              // Source coordinates in the original image
+              const sourceX = Math.max(
+                0,
+                Math.min(canvas.width - 1, imgX - sampleSize + x)
+              );
+              const sourceY = Math.max(
+                0,
+                Math.min(canvas.height - 1, imgY - sampleSize + y)
+              );
+
+              try {
+                // Get the color of this pixel
+                const pixelData = ctx.getImageData(sourceX, sourceY, 1, 1).data;
+                const red = pixelData[0];
+                const green = pixelData[1];
+                const blue = pixelData[2];
+
+                // Calculate the position for this pixel
+                const pixelX = Math.floor(x * pixelSize);
+                const pixelY = Math.floor(y * pixelSize);
+
+                // Draw three rectangles to represent RGB subpixels
+                // Red subpixel (leftmost)
+                zoomCtx.fillStyle = `rgb(${red}, 0, 0)`;
+                zoomCtx.fillRect(pixelX, pixelY, subpixelWidth, pixelSize);
+
+                // Green subpixel (middle)
+                zoomCtx.fillStyle = `rgb(0, ${green}, 0)`;
+                zoomCtx.fillRect(
+                  pixelX + subpixelWidth,
+                  pixelY,
+                  subpixelWidth,
+                  pixelSize
+                );
+
+                // Blue subpixel (rightmost)
+                zoomCtx.fillStyle = `rgb(0, 0, ${blue})`;
+                zoomCtx.fillRect(
+                  pixelX + subpixelWidth * 2,
+                  pixelY,
+                  subpixelWidth,
+                  pixelSize
+                );
+
+                // Draw grid lines for clarity
+                zoomCtx.strokeStyle = "#888";
+                zoomCtx.lineWidth = 0.5;
+                zoomCtx.strokeRect(pixelX, pixelY, pixelSize, pixelSize);
+
+                // Draw separators between subpixels
+                zoomCtx.beginPath();
+                zoomCtx.moveTo(pixelX + subpixelWidth, pixelY);
+                zoomCtx.lineTo(pixelX + subpixelWidth, pixelY + pixelSize);
+                zoomCtx.stroke();
+
+                zoomCtx.beginPath();
+                zoomCtx.moveTo(pixelX + subpixelWidth * 2, pixelY);
+                zoomCtx.lineTo(pixelX + subpixelWidth * 2, pixelY + pixelSize);
+                zoomCtx.stroke();
+              } catch (e) {
+                console.error("Error getting pixel data:", e);
+              }
+            }
+          }
+        } 
+        // For high zoom levels (but not maximum), show pixels as unified squares 
+        else if (currentZoomLevel > 10) {
+          console.log("Using unified pixel rendering for high zoom");
 
           // Size of each pixel in the zoomed view
           const pixelSize = zoomedView.width / (sampleSize * 2);
@@ -270,28 +348,29 @@ function initPixelZoom() {
               try {
                 // Get the color of this pixel
                 const pixelData = ctx.getImageData(sourceX, sourceY, 1, 1).data;
+                const red = pixelData[0];
+                const green = pixelData[1];
+                const blue = pixelData[2];
 
-                // Set the fill style to this pixel's color
-                zoomCtx.fillStyle = `rgb(${pixelData[0]}, ${pixelData[1]}, ${pixelData[2]})`;
+                // Calculate the position for this pixel
+                const pixelX = Math.floor(x * pixelSize);
+                const pixelY = Math.floor(y * pixelSize);
 
-                // Draw a rectangle representing this pixel
+                // Draw a single square with the combined RGB color
+                zoomCtx.fillStyle = `rgb(${red}, ${green}, ${blue})`;
                 zoomCtx.fillRect(
-                  Math.floor(x * pixelSize),
-                  Math.floor(y * pixelSize),
-                  Math.ceil(pixelSize),
-                  Math.ceil(pixelSize)
+                  pixelX,
+                  pixelY,
+                  pixelSize,
+                  pixelSize
                 );
 
                 // Draw grid lines for very high zoom
                 if (currentZoomLevel > 20) {
+                  // Draw outline around the pixel
                   zoomCtx.strokeStyle = "#888";
                   zoomCtx.lineWidth = 0.5;
-                  zoomCtx.strokeRect(
-                    Math.floor(x * pixelSize),
-                    Math.floor(y * pixelSize),
-                    Math.ceil(pixelSize),
-                    Math.ceil(pixelSize)
-                  );
+                  zoomCtx.strokeRect(pixelX, pixelY, pixelSize, pixelSize);
                 }
               } catch (e) {
                 console.error("Error getting pixel data:", e);
@@ -387,80 +466,103 @@ function initPixelZoom() {
 
 // ----- Color Mixer Implementation -----
 function initColorMixer() {
-    const redSlider = document.getElementById('red-slider');
-    const greenSlider = document.getElementById('green-slider');
-    const blueSlider = document.getElementById('blue-slider');
-    
-    const redValue = document.getElementById('red-value');
-    const greenValue = document.getElementById('green-value');
-    const blueValue = document.getElementById('blue-value');
-    
-    const colorDisplay = document.getElementById('color-display');
-    const pixelGridContainer = document.getElementById('pixel-grid-container');
-    
-    // Create pixel grid
-    createPixelGrid();
-    
-    // Update color on slider change
-    [redSlider, greenSlider, blueSlider].forEach(slider => {
-        slider.addEventListener('input', updateColor);
+  const redSlider = document.getElementById("red-slider");
+  const greenSlider = document.getElementById("green-slider");
+  const blueSlider = document.getElementById("blue-slider");
+
+  const redValue = document.getElementById("red-value");
+  const greenValue = document.getElementById("green-value");
+  const blueValue = document.getElementById("blue-value");
+
+  const colorDisplay = document.getElementById("color-display");
+  const pixelGridContainer = document.getElementById("pixel-grid-container");
+
+  // Create pixel grid
+  createPixelGrid();
+
+  // Update color on slider change
+  [redSlider, greenSlider, blueSlider].forEach((slider) => {
+    slider.addEventListener("input", updateColor);
+  });
+
+  // Initial color update
+  updateColor();
+
+  // Create a grid of pixels with RGB subpixels
+  function createPixelGrid() {
+    pixelGridContainer.innerHTML = "";
+
+    // Create a 8x8 grid of "pixels" (64 total)
+    for (let i = 0; i < 64; i++) {
+      const pixelContainer = document.createElement("div");
+      pixelContainer.classList.add("pixel-container");
+
+      // Create the three RGB subpixels for each pixel
+      const redSubpixel = document.createElement("div");
+      redSubpixel.classList.add("subpixel", "red-subpixel");
+
+      const greenSubpixel = document.createElement("div");
+      greenSubpixel.classList.add("subpixel", "green-subpixel");
+
+      const blueSubpixel = document.createElement("div");
+      blueSubpixel.classList.add("subpixel", "blue-subpixel");
+
+      // Add subpixels to the pixel container
+      pixelContainer.appendChild(redSubpixel);
+      pixelContainer.appendChild(greenSubpixel);
+      pixelContainer.appendChild(blueSubpixel);
+
+      // Add the pixel to the grid
+      pixelGridContainer.appendChild(pixelContainer);
+    }
+  }
+
+  // Update the color display based on RGB values
+  function updateColor() {
+    const red = redSlider.value;
+    const green = greenSlider.value;
+    const blue = blueSlider.value;
+
+    // Update the value displays
+    redValue.textContent = red;
+    greenValue.textContent = green;
+    blueValue.textContent = blue;
+
+    // Create color string for the main color display
+    const colorStr = `rgb(${red}, ${green}, ${blue})`;
+
+    // Update the color display
+    colorDisplay.style.backgroundColor = colorStr;
+
+    // Update the pixel grid to show RGB components
+    updatePixelGrid(parseInt(red), parseInt(green), parseInt(blue));
+  }
+
+  // Show RGB subpixels in the pixel grid
+  function updatePixelGrid(r, g, b) {
+    // Select all subpixels
+    const redSubpixels = pixelGridContainer.querySelectorAll(".red-subpixel");
+    const greenSubpixels =
+      pixelGridContainer.querySelectorAll(".green-subpixel");
+    const blueSubpixels = pixelGridContainer.querySelectorAll(".blue-subpixel");
+
+    // Update each subpixel with its corresponding color intensity
+    redSubpixels.forEach((subpixel) => {
+      subpixel.style.backgroundColor = `rgb(${r}, 0, 0)`;
+      // Adjust brightness for better visibility
+      subpixel.style.opacity = r > 50 ? "1.0" : "0.9";
     });
-    
-    // Initial color update
-    updateColor();
-    
-    // Create a 10x10 grid of "pixels"
-    function createPixelGrid() {
-        pixelGridContainer.innerHTML = '';
-        for (let i = 0; i < 100; i++) {
-            const pixel = document.createElement('div');
-            pixel.classList.add('pixel');
-            pixelGridContainer.appendChild(pixel);
-        }
-    }
-    
-    // Update the color display based on RGB values
-    function updateColor() {
-        const red = redSlider.value;
-        const green = greenSlider.value;
-        const blue = blueSlider.value;
-        
-        // Update the value displays
-        redValue.textContent = red;
-        greenValue.textContent = green;
-        blueValue.textContent = blue;
-        
-        // Create color string
-        const colorStr = `rgb(${red}, ${green}, ${blue})`;
-        
-        // Update the color display
-        colorDisplay.style.backgroundColor = colorStr;
-        
-        // Update the pixel grid to show RGB components
-        updatePixelGrid(parseInt(red), parseInt(green), parseInt(blue));
-    }
-    
-    // Show RGB subpixels in the pixel grid
-    function updatePixelGrid(r, g, b) {
-        const pixels = pixelGridContainer.querySelectorAll('.pixel');
-        
-        pixels.forEach((pixel, index) => {
-            // Create a pattern with R, G, B subpixels
-            if (index % 3 === 0) {
-                // Red subpixel
-                pixel.style.backgroundColor = `rgb(${r}, 0, 0)`;
-            } else if (index % 3 === 1) {
-                // Green subpixel
-                pixel.style.backgroundColor = `rgb(0, ${g}, 0)`;
-            } else {
-                // Blue subpixel
-                pixel.style.backgroundColor = `rgb(0, 0, ${b})`;
-            }
-            
-            // Brighten the colors slightly to make them more visible
-            pixel.style.opacity = '0.9';
-        });
-    }
+
+    greenSubpixels.forEach((subpixel) => {
+      subpixel.style.backgroundColor = `rgb(0, ${g}, 0)`;
+      subpixel.style.opacity = g > 50 ? "1.0" : "0.9";
+    });
+
+    blueSubpixels.forEach((subpixel) => {
+      subpixel.style.backgroundColor = `rgb(0, 0, ${b})`;
+      subpixel.style.opacity = b > 50 ? "1.0" : "0.9";
+    });
+  }
 }
 
 // ----- Resolution Explorer Implementation -----
