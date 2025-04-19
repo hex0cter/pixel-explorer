@@ -44,12 +44,13 @@
                         <div id="pixel-canvas" class="canvas-container">
                             <img id="sample-image" src="img/sample-image.jpg" alt="Sample Image">
                             <div id="zoom-area"></div>
-                            <canvas id="zoomed-view" width="150" height="150"></canvas>
                         </div>
                         <div id="pixel-info" class="info-panel">
                             <h3>What Are Pixels?</h3>
                             <p>Pixels are tiny dots that make up everything you see on a screen. Each pixel can display a different color!</p>
-                            <p>Try zooming in to see individual pixels.</p>
+                            <div class="zoomed-view-container">
+                                <canvas id="zoomed-view" width="150" height="150"></canvas>
+                            </div>
                         </div>
                     </div>
                 </div>
