@@ -727,9 +727,10 @@ function initResolutionExplorer() {
   const resolutionDisplay = document.getElementById("resolution-display");
 
   // Use an actual image element instead of background-image
+  //aspect-ratio: 1 / 1;
   const displayImage = document.createElement("img");
-  displayImage.style.maxWidth = "100%";
-  displayImage.style.maxHeight = "300px";
+  displayImage.style.width = "100%";
+  displayImage.style.aspectRatio = "2/1";
   displayImage.style.display = "block";
   displayImage.style.margin = "0 auto";
 
@@ -847,7 +848,7 @@ function initResolutionExplorer() {
     const ctx = canvas.getContext("2d");
 
     canvas.width = 800;
-    canvas.height = 600;
+    canvas.height = 400;
 
     // Create gradient background
     const gradient = ctx.createLinearGradient(
@@ -882,7 +883,7 @@ function initResolutionExplorer() {
     ctx.font = "bold 48px Arial";
     ctx.fillStyle = "white";
     ctx.textAlign = "center";
-    ctx.fillText("Resolution Demo", canvas.width / 2, 100);
+    ctx.fillText("Resolution Demo", canvas.width / 2, 60);
 
     // Assign the generated image to our original image
     originalImage.src = canvas.toDataURL();
